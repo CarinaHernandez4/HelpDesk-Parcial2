@@ -93,6 +93,29 @@ class TicketService:
     def assigned_to(self, technician_id: int) -> list[Ticket]:
         return self.list(assignee_id=technician_id)
 
+
+
+
+    def watchers(self, ticket_id: int) -> list[User]:
+        ticket = self.require(ticket_id)
+        seen_ids: set[int] = set()
+        result: list[User] = []
+
+        requester = self._users.require(ticket.requester_id)
+        result.append(requester)
+        seen_ids.add(requester.id)
+
+        if ticket.assignee_id is not None:
+            technician = self._users.require(ticket.assignee_id)
+            if technician.id not in seen_ids:
+                result.append(technician)
+
+        return result
+
+
+
+
+
     def assign(
         self,
         ticket_id: int,
@@ -310,3 +333,6 @@ class TicketService:
 
     def _now(self) -> datetime:
         return datetime.now().astimezone()
+
+
+      
